@@ -98,7 +98,7 @@ export async function getDepartures(airport: string, date: string): Promise<Flig
     console.log('Departures API response for', airport, 'on', date, ':', JSON.stringify(data, null, 2));
     
     // Check for flights in different possible response structures
-    const flights = data.flights || data.departures || [];
+    const flights = data.departures || data.flights || [];
     
     if (flights.length === 0) {
       console.log('No departures found for', airport, 'on', date);
@@ -123,7 +123,7 @@ export async function getDepartures(airport: string, date: string): Promise<Flig
         if (altResponse.ok) {
           const altData = await altResponse.json();
           console.log('Alternative API response:', altData);
-          const altFlights = altData.flights || altData.departures || [];
+          const altFlights = altData.departures || altData.flights || [];
           if (altFlights.length > 0) {
             console.log('Found', altFlights.length, 'flights using alternative endpoint');
             return altFlights.filter((flight: any) => {
@@ -206,7 +206,7 @@ export async function getArrivals(airport: string, date: string): Promise<Flight
     console.log('Arrivals API response for', airport, 'on', date, ':', JSON.stringify(data, null, 2));
     
     // Check for flights in different possible response structures
-    const flights = data.flights || data.arrivals || [];
+    const flights = data.arrivals || data.flights || [];
     
     if (flights.length === 0) {
       console.log('No arrivals found for', airport, 'on', date);
@@ -231,7 +231,7 @@ export async function getArrivals(airport: string, date: string): Promise<Flight
         if (altResponse.ok) {
           const altData = await altResponse.json();
           console.log('Alternative API response:', altData);
-          const altFlights = altData.flights || altData.arrivals || [];
+          const altFlights = altData.arrivals || altData.flights || [];
           if (altFlights.length > 0) {
             console.log('Found', altFlights.length, 'flights using alternative endpoint');
             return altFlights.filter((flight: any) => {
