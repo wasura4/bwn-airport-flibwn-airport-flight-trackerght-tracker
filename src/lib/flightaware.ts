@@ -74,11 +74,11 @@ export async function getDepartures(airport: string, date: string): Promise<Flig
     const endDate = `${date}T23:59:59Z`;
     
     console.log('Fetching departures for', airport, 'from', startDate, 'to', endDate);
-    console.log('API URL:', `${FLIGHTAWARE_BASE_URL}/airports/${airport}/flights/departures?start=${startDate}&end=${endDate}&max_pages=1`);
+    console.log('API URL:', `${FLIGHTAWARE_BASE_URL}/airports/${airport}/flights/departures?start=${startDate}&end=${endDate}&max_pages=5`);
     
     // Try the API call
     const response = await fetch(
-      `${FLIGHTAWARE_BASE_URL}/airports/${airport}/flights/departures?start=${startDate}&end=${endDate}&max_pages=1`,
+      `${FLIGHTAWARE_BASE_URL}/airports/${airport}/flights/departures?start=${startDate}&end=${endDate}&max_pages=5`,
       {
         headers: {
           'x-apikey': FLIGHTAWARE_API_KEY,
@@ -111,7 +111,7 @@ export async function getDepartures(airport: string, date: string): Promise<Flig
       console.log('Trying alternative API endpoint...');
       try {
         const altResponse = await fetch(
-          `${FLIGHTAWARE_BASE_URL}/airports/${airport}/flights?start=${startDate}&end=${endDate}&max_pages=1`,
+          `${FLIGHTAWARE_BASE_URL}/airports/${airport}/flights?start=${startDate}&end=${endDate}&max_pages=5`,
           {
             headers: {
               'x-apikey': FLIGHTAWARE_API_KEY,
@@ -127,9 +127,10 @@ export async function getDepartures(airport: string, date: string): Promise<Flig
           if (altFlights.length > 0) {
             console.log('Found', altFlights.length, 'flights using alternative endpoint');
             return altFlights.filter((flight: any) => {
-              const hasOrigin = flight.origin && typeof flight.origin === 'object';
-              const hasDestination = flight.destination && typeof flight.destination === 'object';
-              return hasOrigin && hasDestination;
+              const hasOrigin = flight.origin;
+              const hasDestination = flight.destination;
+              // Be less restrictive - keep flights even if they have missing data
+      return true; // Keep all flights for now to see what we get
             });
           }
         }
@@ -149,8 +150,8 @@ export async function getDepartures(airport: string, date: string): Promise<Flig
     
     // Filter out flights with missing origin/destination data
     const validFlights = flights.filter((flight: Flight) => {
-      const hasOrigin = flight.origin && typeof flight.origin === 'object';
-      const hasDestination = flight.destination && typeof flight.destination === 'object';
+      const hasOrigin = flight.origin;
+      const hasDestination = flight.destination;
       
       if (!hasOrigin || !hasDestination) {
         console.warn('Filtering out flight with missing data:', {
@@ -162,7 +163,8 @@ export async function getDepartures(airport: string, date: string): Promise<Flig
         });
       }
       
-      return hasOrigin && hasDestination;
+      // Be less restrictive - keep flights even if they have missing data
+      return true; // Keep all flights for now to see what we get
     });
     
     console.log(`Filtered ${flights.length} flights down to ${validFlights.length} valid flights`);
@@ -181,10 +183,10 @@ export async function getArrivals(airport: string, date: string): Promise<Flight
     const endDate = `${date}T23:59:59Z`;
     
     console.log('Fetching arrivals for', airport, 'from', startDate, 'to', endDate);
-    console.log('API URL:', `${FLIGHTAWARE_BASE_URL}/airports/${airport}/flights/arrivals?start=${startDate}&end=${endDate}&max_pages=1`);
+    console.log('API URL:', `${FLIGHTAWARE_BASE_URL}/airports/${airport}/flights/arrivals?start=${startDate}&end=${endDate}&max_pages=5`);
     
     const response = await fetch(
-      `${FLIGHTAWARE_BASE_URL}/airports/${airport}/flights/arrivals?start=${startDate}&end=${endDate}&max_pages=1`,
+      `${FLIGHTAWARE_BASE_URL}/airports/${airport}/flights/arrivals?start=${startDate}&end=${endDate}&max_pages=5`,
       {
         headers: {
           'x-apikey': FLIGHTAWARE_API_KEY,
@@ -217,7 +219,7 @@ export async function getArrivals(airport: string, date: string): Promise<Flight
       console.log('Trying alternative API endpoint...');
       try {
         const altResponse = await fetch(
-          `${FLIGHTAWARE_BASE_URL}/airports/${airport}/flights?start=${startDate}&end=${endDate}&max_pages=1`,
+          `${FLIGHTAWARE_BASE_URL}/airports/${airport}/flights?start=${startDate}&end=${endDate}&max_pages=5`,
           {
             headers: {
               'x-apikey': FLIGHTAWARE_API_KEY,
@@ -233,9 +235,10 @@ export async function getArrivals(airport: string, date: string): Promise<Flight
           if (altFlights.length > 0) {
             console.log('Found', altFlights.length, 'flights using alternative endpoint');
             return altFlights.filter((flight: any) => {
-              const hasOrigin = flight.origin && typeof flight.origin === 'object';
-              const hasDestination = flight.destination && typeof flight.destination === 'object';
-              return hasOrigin && hasDestination;
+              const hasOrigin = flight.origin;
+              const hasDestination = flight.destination;
+              // Be less restrictive - keep flights even if they have missing data
+      return true; // Keep all flights for now to see what we get
             });
           }
         }
@@ -255,8 +258,8 @@ export async function getArrivals(airport: string, date: string): Promise<Flight
     
     // Filter out flights with missing origin/destination data
     const validFlights = flights.filter((flight: Flight) => {
-      const hasOrigin = flight.origin && typeof flight.origin === 'object';
-      const hasDestination = flight.destination && typeof flight.destination === 'object';
+      const hasOrigin = flight.origin;
+      const hasDestination = flight.destination;
       
       if (!hasOrigin || !hasDestination) {
         console.warn('Filtering out flight with missing data:', {
@@ -268,7 +271,8 @@ export async function getArrivals(airport: string, date: string): Promise<Flight
         });
       }
       
-      return hasOrigin && hasDestination;
+      // Be less restrictive - keep flights even if they have missing data
+      return true; // Keep all flights for now to see what we get
     });
     
     console.log(`Filtered ${flights.length} flights down to ${validFlights.length} valid flights`);
