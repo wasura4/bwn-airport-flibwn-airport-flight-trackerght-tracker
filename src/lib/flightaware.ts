@@ -67,11 +67,25 @@ export interface FlightResponse {
   num_pages: number;
 }
 
+function getBruneiUtcRange(date: string): { startUtc: string; endUtc: string } {
+  // Interpret the provided YYYY-MM-DD as Asia/Brunei local midnight to 23:59:59,
+  // then convert to UTC ISO strings for the API
+  const start = new Date(`${date}T00:00:00+08:00`).toISOString();
+  const end = new Date(`${date}T23:59:59+08:00`).toISOString();
+  return { startUtc: start, endUtc: end };
+}
+
+async function fetchWithAirportFallback(
+  urlBuilder: (airportCode: string) => string,
+  headers: Record<string, string>,
+): Promise<Response> {
+  // Try with provided airport first (likely IATA=BWN). If empty result later, caller may try ICAO.
+  return fetch(urlBuilder('BWN'), { headers, signal: AbortSignal.timeout(15000) });
+}
+
 export async function getDepartures(airport: string, date: string): Promise<Flight[]> {
   try {
-    // Try different date formats
-    const startDate = `${date}T00:00:00Z`;
-    const endDate = `${date}T23:59:59Z`;
+    const { startUtc: startDate, endUtc: endDate } = getBruneiUtcRange(date);
     
     console.log('Fetching departures for', airport, 'from', startDate, 'to', endDate);
     console.log('API URL:', `${FLIGHTAWARE_BASE_URL}/airports/${airport}/flights/departures?start=${startDate}&end=${endDate}&max_pages=5`);
@@ -107,6 +121,30 @@ export async function getDepartures(airport: string, date: string): Promise<Flig
       console.log('2. API doesn\'t have data for future dates');
       console.log('3. Airport code might be incorrect');
       
+      // Fallback: if IATA code was used, try ICAO for BWN (WBSB)
+      if (airport.toUpperCase() === 'BWN') {
+        try {
+          console.log('Trying ICAO fallback WBSB for departures...');
+          const icaoRes = await fetch(
+            `${FLIGHTAWARE_BASE_URL}/airports/WBSB/flights/departures?start=${startDate}&end=${endDate}&max_pages=5`,
+            {
+              headers: { 'x-apikey': FLIGHTAWARE_API_KEY },
+              signal: AbortSignal.timeout(12000),
+            }
+          );
+          if (icaoRes.ok) {
+            const icaoData: FlightResponse = await icaoRes.json();
+            const icaoFlights = icaoData.departures || icaoData.flights || [];
+            if (icaoFlights.length > 0) {
+              console.log('Found', icaoFlights.length, 'departures via ICAO WBSB');
+              return icaoFlights;
+            }
+          }
+        } catch (e) {
+          console.warn('ICAO fallback WBSB failed for departures:', e);
+        }
+      }
+
       // Try alternative API endpoint for future dates
       console.log('Trying alternative API endpoint...');
       try {
@@ -178,9 +216,7 @@ export async function getDepartures(airport: string, date: string): Promise<Flig
 
 export async function getArrivals(airport: string, date: string): Promise<Flight[]> {
   try {
-    // Try different date formats
-    const startDate = `${date}T00:00:00Z`;
-    const endDate = `${date}T23:59:59Z`;
+    const { startUtc: startDate, endUtc: endDate } = getBruneiUtcRange(date);
     
     console.log('Fetching arrivals for', airport, 'from', startDate, 'to', endDate);
     console.log('API URL:', `${FLIGHTAWARE_BASE_URL}/airports/${airport}/flights/arrivals?start=${startDate}&end=${endDate}&max_pages=5`);
@@ -215,6 +251,30 @@ export async function getArrivals(airport: string, date: string): Promise<Flight
       console.log('2. API doesn\'t have data for future dates');
       console.log('3. Airport code might be incorrect');
       
+      // Fallback: if IATA code was used, try ICAO for BWN (WBSB)
+      if (airport.toUpperCase() === 'BWN') {
+        try {
+          console.log('Trying ICAO fallback WBSB for arrivals...');
+          const icaoRes = await fetch(
+            `${FLIGHTAWARE_BASE_URL}/airports/WBSB/flights/arrivals?start=${startDate}&end=${endDate}&max_pages=5`,
+            {
+              headers: { 'x-apikey': FLIGHTAWARE_API_KEY },
+              signal: AbortSignal.timeout(12000),
+            }
+          );
+          if (icaoRes.ok) {
+            const icaoData: FlightResponse = await icaoRes.json();
+            const icaoFlights = icaoData.arrivals || icaoData.flights || [];
+            if (icaoFlights.length > 0) {
+              console.log('Found', icaoFlights.length, 'arrivals via ICAO WBSB');
+              return icaoFlights;
+            }
+          }
+        } catch (e) {
+          console.warn('ICAO fallback WBSB failed for arrivals:', e);
+        }
+      }
+
       // Try alternative API endpoint for future dates
       console.log('Trying alternative API endpoint...');
       try {
