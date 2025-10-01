@@ -126,7 +126,7 @@ export async function getDepartures(airport: string, date: string): Promise<Flig
           const altFlights = altData.flights || altData.departures || [];
           if (altFlights.length > 0) {
             console.log('Found', altFlights.length, 'flights using alternative endpoint');
-            return altFlights.filter(flight => {
+            return altFlights.filter((flight: any) => {
               const hasOrigin = flight.origin && typeof flight.origin === 'object';
               const hasDestination = flight.destination && typeof flight.destination === 'object';
               return hasOrigin && hasDestination;
@@ -148,7 +148,7 @@ export async function getDepartures(airport: string, date: string): Promise<Flig
     }
     
     // Filter out flights with missing origin/destination data
-    const validFlights = flights.filter(flight => {
+    const validFlights = flights.filter((flight: Flight) => {
       const hasOrigin = flight.origin && typeof flight.origin === 'object';
       const hasDestination = flight.destination && typeof flight.destination === 'object';
       
@@ -232,7 +232,7 @@ export async function getArrivals(airport: string, date: string): Promise<Flight
           const altFlights = altData.flights || altData.arrivals || [];
           if (altFlights.length > 0) {
             console.log('Found', altFlights.length, 'flights using alternative endpoint');
-            return altFlights.filter(flight => {
+            return altFlights.filter((flight: any) => {
               const hasOrigin = flight.origin && typeof flight.origin === 'object';
               const hasDestination = flight.destination && typeof flight.destination === 'object';
               return hasOrigin && hasDestination;
@@ -254,7 +254,7 @@ export async function getArrivals(airport: string, date: string): Promise<Flight
     }
     
     // Filter out flights with missing origin/destination data
-    const validFlights = flights.filter(flight => {
+    const validFlights = flights.filter((flight: Flight) => {
       const hasOrigin = flight.origin && typeof flight.origin === 'object';
       const hasDestination = flight.destination && typeof flight.destination === 'object';
       

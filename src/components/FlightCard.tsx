@@ -66,7 +66,7 @@ const buildLogoCandidates = (params: {
   const candidates: string[] = [];
   // First, any preferred overrides
   codes.forEach((c) => {
-    if (preferred[c]) candidates.push(preferred[c]);
+    if (c in preferred && (preferred as Record<string, string>)[c]) candidates.push((preferred as Record<string, string>)[c]);
   });
   // Then, generic Skyscanner favicon by code
   codes.forEach((c) => {
